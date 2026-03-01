@@ -2,119 +2,167 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Экзаменационный тест</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Экзаменационный тест</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #1e1e2f, #2b2b45);
-  margin: 0;
-  padding: 10px;
-  color: white;
-  min-height: 100vh;
+* {
   box-sizing: border-box;
 }
 
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #141e30, #243b55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 15px;
+  color: white;
+}
+
 #app {
-  background: #2f2f4f;
-  padding: 20px;
-  border-radius: 15px;
-  max-width: 700px;
-  margin: auto;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  box-sizing: border-box;
+  width: 100%;
+  max-width: 750px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  animation: fadeIn 0.6s ease;
 }
 
 h2 {
   text-align: center;
-  font-size: 1.5em;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  overflow: hidden;
   margin-bottom: 20px;
 }
 
-#quiz p {
-  font-size: 1.1em;
-  margin-bottom: 15px;
+.progress {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  transition: width 0.3s ease;
 }
 
-button {
+#question {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+  min-height: 60px;
+}
+
+.option {
   width: 100%;
   padding: 15px;
   margin: 8px 0;
-  border: none;
-  border-radius: 8px;
-  background: #4a6cf7;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: rgba(255,255,255,0.1);
   color: white;
-  font-size: 1em;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.25s ease;
+  font-size: 1em;
 }
 
-button:hover {
-  background: #3451d1;
+.option:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateY(-2px);
 }
 
-button.selected {
-  background: #00c896;
+.option.selected {
+  border: 2px solid #00e676;
+  background: rgba(0,230,118,0.2);
 }
 
 .nav {
   display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
   gap: 10px;
-  margin-top: 15px;
-  flex-wrap: wrap;
 }
 
 .nav button {
-  flex: 1 1 45%;
-  min-width: 100px;
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
 }
 
-#progress {
-  margin-top: 15px;
-  font-size: 14px;
+#backBtn {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+#nextBtn {
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  color: white;
+}
+
+.nav button:hover {
   opacity: 0.8;
-  text-align: center;
 }
 
 #result {
-  margin-top: 20px;
-  font-size: 20px;
-  font-weight: bold;
   text-align: center;
+  font-size: 1.4em;
+  margin-top: 25px;
+  font-weight: bold;
 }
 
 @media (max-width: 480px) {
   #app {
-    padding: 15px;
+    padding: 20px;
   }
-  h2 {
-    font-size: 1.3em;
+  #question {
+    font-size: 1.1em;
   }
-  button {
+  .option {
     padding: 18px;
-    font-size: 1em;
   }
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
 }
 </style>
 </head>
+
 <body>
 
 <div id="app">
   <h2>Экзаменационный тест</h2>
-  <div id="quiz"></div>
+
+  <div class="progress-bar">
+    <div class="progress" id="progressBar"></div>
+  </div>
+
+  <div id="question"></div>
+  <div id="options"></div>
 
   <div class="nav">
     <button id="backBtn">Назад</button>
     <button id="nextBtn">Далее</button>
   </div>
 
-  <p id="progress"></p>
-  <p id="result"></p>
+  <div id="result"></div>
 </div>
 
 <script>
-// Все 90+ вопросов из твоего списка
+
 const rawData = `
 1 кОм равен?|100 Ом|1000 Ом|10000 Ом|0,1 Ом|10 Ом|1
 1 Мом равен?|100000 Ом|1000000 Ом|10000 Ом|100 Ом|10000000 Ом|1
@@ -208,48 +256,83 @@ const rawData = `
 Электрослесарю по ремонту электрооборудования представлено право:|Запускать без схемы|Отклонять наряд при несоответствии схемы электроснабжения|Игнорировать|Сам менять|Не выполнять|1
 `;
 
-const questions = rawData.trim().split("\n").map(line => {
+
+// ====== Перемешивание массива ======
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// ====== Подготовка вопросов ======
+let questions = rawData.trim().split("\n").map(line => {
   const parts = line.split("|");
+
+  const options = parts.slice(1, 6).map((text, index) => ({
+    text,
+    originalIndex: index
+  }));
+
+  const correctIndex = parseInt(parts[6]);
+
   return {
     question: parts[0],
-    options: parts.slice(1, 6),
-    correct: parseInt(parts[6])
+    options,
+    correctIndex
   };
 });
 
+// 🔥 Перемешиваем вопросы
+questions = shuffle(questions);
+
+// 🔥 Перемешиваем ответы в каждом вопросе
+questions.forEach(q => {
+  q.options = shuffle(q.options);
+});
+
+// ====== Логика теста ======
 let currentQuestion = 0;
 let userAnswers = [];
 
-const quiz = document.getElementById("quiz");
+const questionEl = document.getElementById("question");
+const optionsEl = document.getElementById("options");
 const nextBtn = document.getElementById("nextBtn");
 const backBtn = document.getElementById("backBtn");
-const progress = document.getElementById("progress");
-const result = document.getElementById("result");
+const resultEl = document.getElementById("result");
+const progressBar = document.getElementById("progressBar");
 
 function showQuestion() {
   const q = questions[currentQuestion];
-  quiz.innerHTML = `<p><strong>${currentQuestion + 1}. ${q.question}</strong></p>`;
+
+  questionEl.innerHTML =
+    `<strong>${currentQuestion + 1}. ${q.question}</strong>`;
+
+  optionsEl.innerHTML = "";
 
   q.options.forEach((option, index) => {
-    const btn = document.createElement("button");
-    btn.innerText = option;
+    const btn = document.createElement("div");
+    btn.className = "option";
+    btn.innerText = option.text;
 
     if (userAnswers[currentQuestion] === index) {
       btn.classList.add("selected");
     }
 
-    btn.onclick = function () {
+    btn.onclick = () => {
       userAnswers[currentQuestion] = index;
       showQuestion();
     };
 
-    quiz.appendChild(btn);
+    optionsEl.appendChild(btn);
   });
 
-  progress.innerText = `Вопрос ${currentQuestion + 1} из ${questions.length}`;
+  progressBar.style.width =
+    ((currentQuestion + 1) / questions.length) * 100 + "%";
 }
 
-nextBtn.onclick = function () {
+nextBtn.onclick = () => {
   if (userAnswers[currentQuestion] == null) return;
 
   currentQuestion++;
@@ -261,7 +344,7 @@ nextBtn.onclick = function () {
   }
 };
 
-backBtn.onclick = function () {
+backBtn.onclick = () => {
   if (currentQuestion > 0) {
     currentQuestion--;
     showQuestion();
@@ -270,18 +353,29 @@ backBtn.onclick = function () {
 
 function finishTest() {
   let score = 0;
-  questions.forEach((q, index) => {
-    if (userAnswers[index] === q.correct) score++;
+
+  questions.forEach((q, i) => {
+    const selected = userAnswers[i];
+    if (
+      selected != null &&
+      q.options[selected].originalIndex === q.correctIndex
+    ) {
+      score++;
+    }
   });
 
-  quiz.innerHTML = "";
+  questionEl.innerHTML = "";
+  optionsEl.innerHTML = "";
   nextBtn.style.display = "none";
   backBtn.style.display = "none";
-  progress.innerText = "";
-  result.innerText = `Тест завершён. Результат: ${score} из ${questions.length}`;
+  progressBar.style.width = "100%";
+
+  resultEl.innerHTML =
+    `Тест завершён<br><br>Результат: ${score} из ${questions.length}`;
 }
 
 showQuestion();
+
 </script>
 
 </body>
